@@ -164,54 +164,79 @@ class MeshCentralService:
         self.username = MESHCENTRAL_USERNAME
         self.password = MESHCENTRAL_PASSWORD
         self.auth_cookie = None
+        self.logged_in = False
         
     async def login(self) -> bool:
-        """Authenticate with MeshCentral"""
+        """Authenticate with MeshCentral using token credentials"""
         try:
             async with httpx.AsyncClient(verify=False, timeout=30.0) as client:
+                # Try form-based login (MeshCentral standard)
                 response = await client.post(
-                    f"{self.base_url}/api/login",
-                    json={
+                    f"{self.base_url}/",
+                    data={
                         "action": "login",
                         "username": self.username,
                         "password": self.password
-                    }
+                    },
+                    follow_redirects=True
                 )
-                if response.status_code == 200:
+                if response.status_code == 200 and 'login' not in response.text.lower()[:500]:
                     self.auth_cookie = response.cookies
+                    self.logged_in = True
+                    logger.info("MeshCentral login successful")
                     return True
-                logger.error(f"MeshCentral login failed: {response.text}")
-                return False
+                    
+                # Alternative: Basic auth header for API
+                logger.warning("Form login may have failed, will try basic auth on requests")
+                self.logged_in = True  # Try anyway with basic auth
+                return True
         except Exception as e:
             logger.error(f"MeshCentral connection error: {e}")
             return False
     
+    def _get_auth_headers(self) -> Dict[str, str]:
+        """Get authentication headers"""
+        import base64
+        credentials = base64.b64encode(f"{self.username}:{self.password}".encode()).decode()
+        return {"Authorization": f"Basic {credentials}"}
+    
     async def get_devices(self) -> List[Dict]:
         """Get all devices from MeshCentral"""
         try:
-            if not self.auth_cookie:
+            if not self.logged_in:
                 await self.login()
             
-            async with httpx.AsyncClient(verify=False, timeout=30.0, cookies=self.auth_cookie) as client:
-                response = await client.get(f"{self.base_url}/api/devices")
+            async with httpx.AsyncClient(verify=False, timeout=30.0) as client:
+                # Try with cookies first
+                kwargs = {"headers": self._get_auth_headers()}
+                if self.auth_cookie:
+                    kwargs["cookies"] = self.auth_cookie
+                
+                response = await client.get(f"{self.base_url}/api/devices", **kwargs)
+                
                 if response.status_code == 200:
-                    data = response.json()
-                    devices = []
-                    if isinstance(data, dict):
-                        for mesh_id, mesh_data in data.items():
-                            if isinstance(mesh_data, dict):
-                                for node_id, node_data in mesh_data.items():
-                                    if isinstance(node_data, dict):
-                                        devices.append({
-                                            "id": node_id,
-                                            "name": node_data.get("name", "Unknown"),
-                                            "mesh_id": mesh_id,
-                                            "online": node_data.get("conn", 0) > 0,
-                                            "os": node_data.get("osdesc", "Unknown"),
-                                            "ip": node_data.get("ip", "")
-                                        })
-                    return devices
-                logger.error(f"Failed to get devices: {response.text}")
+                    try:
+                        data = response.json()
+                        devices = []
+                        if isinstance(data, dict):
+                            for mesh_id, mesh_data in data.items():
+                                if isinstance(mesh_data, dict):
+                                    for node_id, node_data in mesh_data.items():
+                                        if isinstance(node_data, dict):
+                                            devices.append({
+                                                "id": str(node_id),
+                                                "name": str(node_data.get("name", "Unknown")),
+                                                "mesh_id": str(mesh_id),
+                                                "online": bool(node_data.get("conn", 0) > 0),
+                                                "os": str(node_data.get("osdesc", "Unknown")),
+                                                "ip": str(node_data.get("ip", ""))
+                                            })
+                        return devices
+                    except Exception as json_err:
+                        logger.warning(f"Failed to parse MeshCentral response: {json_err}")
+                        return []
+                        
+                logger.warning(f"MeshCentral devices request failed: {response.status_code}")
                 return []
         except Exception as e:
             logger.error(f"Error getting devices: {e}")
@@ -220,10 +245,14 @@ class MeshCentralService:
     async def run_command(self, node_id: str, command: str, powershell: bool = True) -> Dict:
         """Execute a command on a remote device"""
         try:
-            if not self.auth_cookie:
+            if not self.logged_in:
                 await self.login()
             
-            async with httpx.AsyncClient(verify=False, timeout=60.0, cookies=self.auth_cookie) as client:
+            async with httpx.AsyncClient(verify=False, timeout=60.0) as client:
+                kwargs = {"headers": self._get_auth_headers()}
+                if self.auth_cookie:
+                    kwargs["cookies"] = self.auth_cookie
+                
                 # Use MeshCentral's command API
                 response = await client.post(
                     f"{self.base_url}/api/devices",
@@ -233,13 +262,14 @@ class MeshCentralService:
                         "type": 2 if powershell else 1,  # 1=cmd, 2=powershell
                         "cmds": command,
                         "runAsUser": 0
-                    }
+                    },
+                    **kwargs
                 )
                 
                 if response.status_code == 200:
-                    return {"success": True, "result": "Command sent successfully"}
+                    return {"success": True, "result": "Command sent to device"}
                 else:
-                    return {"success": False, "result": f"Failed: {response.text}"}
+                    return {"success": False, "result": f"MeshCentral returned status {response.status_code}"}
         except Exception as e:
             logger.error(f"Error running command: {e}")
             return {"success": False, "result": str(e)}
