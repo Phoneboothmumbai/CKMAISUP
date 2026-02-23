@@ -593,6 +593,8 @@ async def send_message(ticket_id: str, msg_data: SendMessage, user: dict = Depen
     user_msg_dict = user_message.model_dump()
     user_msg_dict['timestamp'] = user_msg_dict['timestamp'].isoformat()
     await db.chat_messages.insert_one(user_msg_dict)
+    # Remove _id added by MongoDB
+    user_msg_dict.pop('_id', None)
     
     # Get chat history
     messages = await db.chat_messages.find({"ticket_id": ticket_id}, {"_id": 0}).to_list(100)
@@ -617,6 +619,7 @@ async def send_message(ticket_id: str, msg_data: SendMessage, user: dict = Depen
     ai_msg_dict = ai_message.model_dump()
     ai_msg_dict['timestamp'] = ai_msg_dict['timestamp'].isoformat()
     await db.chat_messages.insert_one(ai_msg_dict)
+    ai_msg_dict.pop('_id', None)
     response_messages.append(ai_msg_dict)
     
     # Execute command if needed
