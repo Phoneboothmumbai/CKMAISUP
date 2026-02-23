@@ -121,6 +121,23 @@ class AuditLog(BaseModel):
     success: bool
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+# Device model for manual registration
+class Device(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    node_id: str  # MeshCentral Node ID
+    name: str
+    description: Optional[str] = ""
+    owner_email: Optional[str] = ""  # Customer email who owns this device
+    os: Optional[str] = "Windows"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class DeviceCreate(BaseModel):
+    node_id: str
+    name: str
+    description: Optional[str] = ""
+    owner_email: Optional[str] = ""
+    os: Optional[str] = "Windows"
+
 # ============== AUTH HELPERS ==============
 
 def hash_password(password: str) -> str:
