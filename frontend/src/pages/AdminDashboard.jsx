@@ -15,7 +15,8 @@ import {
   Clock,
   Users,
   Cpu,
-  BarChart3
+  BarChart3,
+  Monitor
 } from "lucide-react";
 
 export default function AdminDashboard() {
