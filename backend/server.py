@@ -546,6 +546,8 @@ async def create_ticket(ticket_data: TicketCreate, user: dict = Depends(get_curr
             sys_msg_dict['timestamp'] = sys_msg_dict['timestamp'].isoformat()
             await db.chat_messages.insert_one(sys_msg_dict)
     
+    # Remove MongoDB's _id before returning
+    ticket_dict.pop('_id', None)
     return ticket_dict
 
 @api_router.get("/tickets/{ticket_id}")
