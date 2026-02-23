@@ -415,6 +415,8 @@ async def create_knowledge_entry(entry_data: KnowledgeBaseCreate, user: dict = D
     entry_dict['updated_at'] = entry_dict['updated_at'].isoformat()
     
     await db.knowledge_base.insert_one(entry_dict)
+    # Remove MongoDB's _id before returning
+    entry_dict.pop('_id', None)
     return entry_dict
 
 @api_router.put("/knowledge-base/{entry_id}")
