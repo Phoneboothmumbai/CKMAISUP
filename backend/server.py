@@ -651,6 +651,7 @@ async def send_message(ticket_id: str, msg_data: SendMessage, user: dict = Depen
         sys_msg_dict = system_message.model_dump()
         sys_msg_dict['timestamp'] = sys_msg_dict['timestamp'].isoformat()
         await db.chat_messages.insert_one(sys_msg_dict)
+        sys_msg_dict.pop('_id', None)
         response_messages.append(sys_msg_dict)
     
     # Update ticket status based on AI action
