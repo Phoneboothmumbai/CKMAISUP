@@ -165,6 +165,7 @@ export default function AdminDashboard() {
           <div className="flex gap-2 pb-4 overflow-x-auto">
             <Link to="/admin" className="px-3 py-1.5 bg-indigo-500/10 text-indigo-400 rounded-full text-sm whitespace-nowrap">Dashboard</Link>
             <Link to="/admin/tickets" className="px-3 py-1.5 text-slate-400 hover:text-white rounded-full text-sm whitespace-nowrap">Tickets</Link>
+            <Link to="/admin/devices" className="px-3 py-1.5 text-slate-400 hover:text-white rounded-full text-sm whitespace-nowrap">Devices</Link>
             <Link to="/admin/knowledge-base" className="px-3 py-1.5 text-slate-400 hover:text-white rounded-full text-sm whitespace-nowrap">Knowledge Base</Link>
             <Link to="/admin/audit-logs" className="px-3 py-1.5 text-slate-400 hover:text-white rounded-full text-sm whitespace-nowrap">Audit Logs</Link>
           </div>
