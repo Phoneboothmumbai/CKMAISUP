@@ -383,6 +383,7 @@ async def register(user_data: UserCreate):
     user_dict['created_at'] = user_dict['created_at'].isoformat()
     
     await db.users.insert_one(user_dict)
+    # MongoDB adds _id, but we don't need it for the response
     
     token = create_token(user.id, user.role)
     return {"token": token, "user": {"id": user.id, "email": user.email, "name": user.name, "role": user.role}}
