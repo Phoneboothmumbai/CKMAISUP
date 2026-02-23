@@ -12,6 +12,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import AuditLogs from "./pages/AuditLogs";
 import AllTickets from "./pages/AllTickets";
+import DeviceManagement from "./pages/DeviceManagement";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
