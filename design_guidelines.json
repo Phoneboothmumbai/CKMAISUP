@@ -1,0 +1,119 @@
+{
+  "brand_identity": {
+    "name": "MeshSupport AI",
+    "persona": "The Pilot's Cockpit - Precise, Calm, Intelligent",
+    "emotional_tone": "Reliable, Efficient, Automated",
+    "visual_style": "Dark Technical SaaS (Deep Slate + Electric Violet)",
+    "description": "An AI-powered IT command center that bridges human language with machine execution. It feels like a futuristic terminal—clean, dark, and highly responsive."
+  },
+  "typography": {
+    "primary_font": "Inter",
+    "heading_font": "Outfit",
+    "mono_font": "JetBrains Mono",
+    "scale": {
+      "h1": "text-4xl md:text-5xl font-bold tracking-tight",
+      "h2": "text-3xl font-semibold tracking-tight",
+      "h3": "text-2xl font-semibold",
+      "body": "text-base leading-relaxed text-slate-300",
+      "small": "text-sm text-slate-400",
+      "tiny": "text-xs font-mono uppercase tracking-wider text-slate-500"
+    },
+    "installation": "Imports via Google Fonts in index.css"
+  },
+  "colors": {
+    "palette": {
+      "mode": "dark",
+      "background": "#020617",
+      "surface": "#0f172a",
+      "surface_highlight": "#1e293b",
+      "border": "#1e293b",
+      "primary": "#6366f1",
+      "primary_glow": "0 0 20px rgba(99, 102, 241, 0.5)",
+      "secondary": "#0ea5e9",
+      "success": "#10b981",
+      "warning": "#f59e0b",
+      "error": "#ef4444",
+      "text_primary": "#f8fafc",
+      "text_secondary": "#94a3b8"
+    },
+    "usage_rules": {
+      "gradients": "No full-screen gradients. Use subtle radial glows for emphasis.",
+      "shadows": "Colored shadows for primary actions (e.g., button glow).",
+      "glass": "Use backdrop-blur-xl with bg-slate-950/70 for overlays and sticky headers."
+    }
+  },
+  "layout_system": {
+    "spacing_scale": "Relaxed. Use p-6 or p-8 for cards. gap-6 for grids.",
+    "container_width": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "grid_styles": {
+      "dashboard": "grid grid-cols-1 md:grid-cols-4 gap-6",
+      "chat": "flex flex-col h-[calc(100vh-4rem)] max-w-3xl mx-auto"
+    },
+    "z_index": {
+      "toast": 50,
+      "modal": 40,
+      "header": 30,
+      "dropdown": 20
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-white hover:bg-primary/90 shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all active:scale-95",
+      "secondary": "bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700",
+      "ghost": "hover:bg-slate-800/50 text-slate-400 hover:text-white"
+    },
+    "cards": {
+      "base": "bg-slate-900/50 border border-slate-800 backdrop-blur-sm rounded-xl p-6",
+      "interactive": "hover:border-primary/50 transition-colors cursor-pointer group"
+    },
+    "inputs": {
+      "base": "bg-slate-950 border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-lg h-11"
+    },
+    "chat_bubbles": {
+      "user": "bg-slate-800 text-slate-100 rounded-2xl rounded-tr-sm p-4 max-w-[80%]",
+      "ai": "bg-primary/10 border border-primary/20 text-slate-100 rounded-2xl rounded-tl-sm p-4 max-w-[80%] shadow-[0_0_10px_rgba(99,102,241,0.1)]",
+      "system": "text-xs text-slate-500 text-center w-full py-2 font-mono"
+    }
+  },
+  "visual_assets": {
+    "icons": {
+      "library": "lucide-react",
+      "style": "stroke-width={1.5} className='w-5 h-5'"
+    },
+    "images": {
+      "login_bg": "https://images.unsplash.com/photo-1764258560300-2346b28b4e7c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGN5YmVyJTIwbmV0d29yayUyMGJsdWUlMjBkYXJrfGVufDB8fHx8MTc3MTg2MjgxN3ww&ixlib=rb-4.1.0&q=85",
+      "empty_state_tech": "https://images.unsplash.com/photo-1626788106664-dd5470a14082?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHw0fHxhYnN0cmFjdCUyMGN5YmVyJTIwbmV0d29yayUyMGJsdWUlMjBkYXJrfGVufDB8fHx8MTc3MTg2MjgxOHww&ixlib=rb-4.1.0&q=85"
+    }
+  },
+  "motion": {
+    "defaults": {
+      "duration": 0.2,
+      "ease": "ease-out"
+    },
+    "classes": {
+      "hover_lift": "transition-transform duration-200 hover:-translate-y-1",
+      "fade_in": "animate-in fade-in zoom-in-95 duration-300",
+      "slide_up": "animate-in slide-in-from-bottom-4 fade-in duration-500"
+    }
+  },
+  "instructions_to_main_agent": {
+    "general": "You are building a high-trust IT tool. Do not use 'cute' or 'playful' designs. Keep it rigid, gridded, and fast. The User Interface should feel like a specialized tool (like Linear or Vercel).",
+    "customer_portal": "Focus on the 'Chat' input. It should be the largest element on the screen. Hide complexity. Use Yes/No pills for quick answers.",
+    "admin_dashboard": "Density is key here. Use tables with sticky headers. Use monospace fonts for logs and command outputs. Status indicators (green dots) must be prominent.",
+    "meshcentral_integration": "Visually represent the 'Connection' to the remote machine. When a command runs, show a terminal-like output window.",
+    "special_rules": [
+      "Use 'sonner' for all notifications.",
+      "Use 'recharts' for any analytics.",
+      "NEVER use gradients for text.",
+      "Always include 'data-testid' on interactive elements."
+    ]
+  },
+  "UNIVERSAL_GUIDELINES": [
+    "Dark colors look good when used independently without gradients.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "NEVER use AI assistant Emoji characters like 🤖🧠 for icons.",
+    "Every interaction needs micro-animations.",
+    "Use 2-3x more spacing than feels comfortable."
+  ]
+}
