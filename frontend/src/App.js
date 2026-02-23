@@ -156,6 +156,7 @@ function AppContent() {
         
         {/* Admin Routes */}
         <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/devices" element={<ProtectedRoute requiredRole="admin"><DeviceManagement /></ProtectedRoute>} />
         <Route path="/admin/knowledge-base" element={<ProtectedRoute requiredRole="admin"><KnowledgeBase /></ProtectedRoute>} />
         <Route path="/admin/audit-logs" element={<ProtectedRoute requiredRole="admin"><AuditLogs /></ProtectedRoute>} />
         <Route path="/admin/tickets" element={<ProtectedRoute requiredRole="admin"><AllTickets /></ProtectedRoute>} />
