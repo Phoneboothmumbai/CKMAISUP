@@ -99,6 +99,14 @@ export default function AdminDashboard() {
               All Tickets
             </Link>
             <Link
+              to="/admin/devices"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
+              data-testid="nav-devices"
+            >
+              <Monitor className="w-5 h-5" />
+              Devices
+            </Link>
+            <Link
               to="/admin/knowledge-base"
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
               data-testid="nav-knowledge-base"
