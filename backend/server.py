@@ -490,11 +490,68 @@ async def delete_knowledge_entry(entry_id: str, user: dict = Depends(require_adm
 
 @api_router.get("/devices")
 async def get_devices(user: dict = Depends(get_current_user)):
-    devices = await mesh_service.get_devices()
+    # Get manually registered devices from database
+    db_devices = await db.devices.find({}, {"_id": 0}).to_list(1000)
+    
+    # If user is customer, only show their devices
+    if user['role'] != 'admin':
+        db_devices = [d for d in db_devices if d.get('owner_email') == user['email'] or not d.get('owner_email')]
+    
+    # Format for frontend
+    devices = []
+    for d in db_devices:
+        devices.append({
+            "id": d.get('node_id', d.get('id')),
+            "name": d.get('name', 'Unknown'),
+            "description": d.get('description', ''),
+            "owner_email": d.get('owner_email', ''),
+            "os": d.get('os', 'Windows'),
+            "online": True,  # We assume registered devices are available
+            "db_id": d.get('id')
+        })
+    
     return devices
+
+@api_router.post("/devices")
+async def create_device(device_data: DeviceCreate, user: dict = Depends(require_admin)):
+    """Manually register a device from MeshCentral"""
+    # Check if node_id already exists
+    existing = await db.devices.find_one({"node_id": device_data.node_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Device with this Node ID already exists")
+    
+    device = Device(**device_data.model_dump())
+    device_dict = device.model_dump()
+    device_dict['created_at'] = device_dict['created_at'].isoformat()
+    
+    await db.devices.insert_one(device_dict)
+    device_dict.pop('_id', None)
+    return device_dict
+
+@api_router.put("/devices/{device_id}")
+async def update_device(device_id: str, device_data: DeviceCreate, user: dict = Depends(require_admin)):
+    update_dict = device_data.model_dump()
+    
+    result = await db.devices.update_one(
+        {"id": device_id},
+        {"$set": update_dict}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Device not found")
+    
+    return {"success": True}
+
+@api_router.delete("/devices/{device_id}")
+async def delete_device(device_id: str, user: dict = Depends(require_admin)):
+    result = await db.devices.delete_one({"id": device_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Device not found")
+    return {"success": True}
 
 @api_router.post("/devices/{device_id}/test")
 async def test_device_connection(device_id: str, user: dict = Depends(get_current_user)):
+    """Test connection to a device by running whoami command"""
     result = await mesh_service.run_command(device_id, "whoami", powershell=True)
     return result
 
