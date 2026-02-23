@@ -577,11 +577,12 @@ async def create_ticket(ticket_data: TicketCreate, user: dict = Depends(get_curr
     
     # Get device name if device_id provided
     if ticket_data.device_id:
-        devices = await mesh_service.get_devices()
-        for device in devices:
-            if device['id'] == ticket_data.device_id:
-                ticket.device_name = device['name']
-                break
+        # Look up device from our database
+        device = await db.devices.find_one({"node_id": ticket_data.device_id}, {"_id": 0})
+        if device:
+            ticket.device_name = device.get('name', 'Unknown Device')
+        else:
+            ticket.device_name = "Device: " + ticket_data.device_id[:8]
     
     ticket_dict = ticket.model_dump()
     ticket_dict['created_at'] = ticket_dict['created_at'].isoformat()
