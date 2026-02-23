@@ -201,36 +201,73 @@ class MeshCentralService:
         return {"Authorization": f"Basic {credentials}"}
     
     async def get_devices(self) -> List[Dict]:
-        """Get all devices from MeshCentral"""
+        """Get all devices from MeshCentral using the meshctrl-like API"""
         try:
             if not self.logged_in:
                 await self.login()
             
             async with httpx.AsyncClient(verify=False, timeout=30.0) as client:
-                # Try with cookies first
+                # MeshCentral uses POST to /meshagents with action parameter
                 kwargs = {"headers": self._get_auth_headers()}
                 if self.auth_cookie:
                     kwargs["cookies"] = self.auth_cookie
                 
-                response = await client.get(f"{self.base_url}/api/devices", **kwargs)
+                # Try different API endpoints that MeshCentral might support
+                endpoints_to_try = [
+                    (f"{self.base_url}/meshagents?user={self.username}", "GET"),
+                    (f"{self.base_url}/api/meshes", "GET"),
+                    (f"{self.base_url}/nodes", "GET"),
+                ]
                 
-                if response.status_code == 200:
+                for url, method in endpoints_to_try:
                     try:
-                        data = response.json()
-                        devices = []
-                        if isinstance(data, dict):
-                            for mesh_id, mesh_data in data.items():
-                                if isinstance(mesh_data, dict):
-                                    for node_id, node_data in mesh_data.items():
-                                        if isinstance(node_data, dict):
+                        if method == "GET":
+                            response = await client.get(url, **kwargs)
+                        else:
+                            response = await client.post(url, **kwargs)
+                        
+                        if response.status_code == 200:
+                            try:
+                                data = response.json()
+                                devices = []
+                                if isinstance(data, dict):
+                                    for mesh_id, mesh_data in data.items():
+                                        if isinstance(mesh_data, dict):
+                                            for node_id, node_data in mesh_data.items():
+                                                if isinstance(node_data, dict):
+                                                    devices.append({
+                                                        "id": str(node_id),
+                                                        "name": str(node_data.get("name", "Unknown")),
+                                                        "mesh_id": str(mesh_id),
+                                                        "online": bool(node_data.get("conn", 0) > 0),
+                                                        "os": str(node_data.get("osdesc", "Unknown")),
+                                                        "ip": str(node_data.get("ip", ""))
+                                                    })
+                                elif isinstance(data, list):
+                                    for item in data:
+                                        if isinstance(item, dict):
                                             devices.append({
-                                                "id": str(node_id),
-                                                "name": str(node_data.get("name", "Unknown")),
-                                                "mesh_id": str(mesh_id),
-                                                "online": bool(node_data.get("conn", 0) > 0),
-                                                "os": str(node_data.get("osdesc", "Unknown")),
-                                                "ip": str(node_data.get("ip", ""))
+                                                "id": str(item.get("_id", item.get("id", ""))),
+                                                "name": str(item.get("name", "Unknown")),
+                                                "mesh_id": str(item.get("meshid", "")),
+                                                "online": bool(item.get("conn", item.get("online", 0)) > 0),
+                                                "os": str(item.get("osdesc", item.get("os", "Unknown"))),
+                                                "ip": str(item.get("ip", ""))
                                             })
+                                if devices:
+                                    return devices
+                            except Exception as json_err:
+                                logger.debug(f"Failed to parse response from {url}: {json_err}")
+                                continue
+                    except Exception as req_err:
+                        logger.debug(f"Request to {url} failed: {req_err}")
+                        continue
+                
+                logger.warning(f"MeshCentral: Could not fetch devices from any endpoint")
+                return []
+        except Exception as e:
+            logger.error(f"Error getting devices: {e}")
+            return []
                         return devices
                     except Exception as json_err:
                         logger.warning(f"Failed to parse MeshCentral response: {json_err}")
