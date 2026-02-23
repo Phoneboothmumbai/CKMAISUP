@@ -268,16 +268,6 @@ class MeshCentralService:
         except Exception as e:
             logger.error(f"Error getting devices: {e}")
             return []
-                        return devices
-                    except Exception as json_err:
-                        logger.warning(f"Failed to parse MeshCentral response: {json_err}")
-                        return []
-                        
-                logger.warning(f"MeshCentral devices request failed: {response.status_code}")
-                return []
-        except Exception as e:
-            logger.error(f"Error getting devices: {e}")
-            return []
     
     async def run_command(self, node_id: str, command: str, powershell: bool = True) -> Dict:
         """Execute a command on a remote device"""
